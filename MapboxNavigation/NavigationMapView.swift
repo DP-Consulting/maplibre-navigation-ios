@@ -967,7 +967,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
 
         if #available(iOS 15, *) {
             line.lineWidth = NSExpression(
-                forMGLInterpolating: NSExpression(forConstantValue: maximumZoomLevel),
+                forMGLInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
                 curveType: .linear,
                 parameters: nil,
                 stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel))
@@ -999,7 +999,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
         // Take the default line width and make it wider for the casing
         if #available(iOS 15, *) {
             lineCasing.lineWidth = NSExpression(
-                forMGLInterpolating: NSExpression(forConstantValue: maximumZoomLevel),
+                forMGLInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
                 curveType: .linear,
                 parameters: nil,
                 stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel.multiplied(by: 1.5)))
