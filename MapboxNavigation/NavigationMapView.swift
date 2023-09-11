@@ -1002,7 +1002,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
                 forMGLInterpolating: [NSExpression expressionForVariable:@"zoomLevel"],
                 curveType: .linear,
                 parameters: nil,
-                stops: MBRouteLineWidthByZoomLevel.multiplied(by: 1.5))
+                stops: NSExpression(MBRouteLineWidthByZoomLevel.multiplied(by: 1.5)))
          } else {
              lineCasing.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel.multiplied(by: 1.5))
          }
