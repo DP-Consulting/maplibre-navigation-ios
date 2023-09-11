@@ -966,13 +966,13 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
         // line.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
 
         if #available(iOS 15, *) {
-            print(" ******** routeStyleLayer iOS 15")
-            
             line.lineWidth = NSExpression(
                 forMGLInterpolating: [NSExpression expressionForVariable:@"zoomLevel"],
                 curveType: .linear,
                 parameters: nil,
-                stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel))
+                stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel)
+            )
+            
         } else {
             line.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
         }
