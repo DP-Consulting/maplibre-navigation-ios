@@ -963,19 +963,19 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
     
     func routeStyleLayer(identifier: String, source: MGLSource) -> MGLStyleLayer {
         let line = MGLLineStyleLayer(identifier: identifier, source: source)
-        line.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
+        // line.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
 
-        /* if #available(iOS 15, *) {
-             line.lineWidth = NSExpression(
-                 forMGLInterpolating: [NSExpression expressionForVariable:@"zoomLevel"],
-                 curveType: .linear,
-                 parameters: nil,
-                 stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel)
-             )
+        if #available(iOS 15, *) {
+            line.lineWidth = NSExpression(
+                forMGLInterpolating: NSExpression(forConstantValue: maximumZoomLevel),
+                curveType: .linear,
+                parameters: nil,
+                stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel)
+            )
             
-         } else {
-             line.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
-         } */
+        } else {
+            line.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
+        }
         
         line.lineColor = NSExpression(
             forConditional: NSPredicate(format: "isAlternateRoute == true"),
