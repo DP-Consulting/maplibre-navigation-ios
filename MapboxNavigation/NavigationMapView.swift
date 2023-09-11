@@ -967,6 +967,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
 
         if #available(iOS 15, *) {
             print(" ******** routeStyleLayer iOS 15")
+            
             line.lineWidth = NSExpression(
                 forMGLInterpolating: [NSExpression expressionForVariable:@"zoomLevel"],
                 curveType: .linear,
@@ -994,10 +995,10 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
     
     func routeCasingStyleLayer(identifier: String, source: MGLSource) -> MGLStyleLayer {
         let lineCasing = MGLLineStyleLayer(identifier: identifier, source: source)
-        //lineCasing.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel.multiplied(by: 1.5))
+        lineCasing.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel.multiplied(by: 1.5))
 
         // Take the default line width and make it wider for the casing
-         if #available(iOS 15, *) {
+         /*if #available(iOS 15, *) {
              lineCasing.lineWidth = NSExpression(
                 forMGLInterpolating: [NSExpression expressionForVariable:@"zoomLevel"],
                 curveType: .linear,
@@ -1005,7 +1006,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
                 stops: NSExpression(MBRouteLineWidthByZoomLevel.multiplied(by: 1.5)))
          } else {
              lineCasing.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel.multiplied(by: 1.5))
-         }
+         }*/
         
         lineCasing.lineColor = NSExpression(
             forConditional: NSPredicate(format: "isAlternateRoute == true"),
