@@ -1,16 +1,16 @@
 
-import Foundation
 import AVFoundation
-import MapboxDirections
+import Foundation
 import MapboxCoreNavigation
+import MapboxDirections
 
 extension ErrorUserInfoKey {
     static let spokenInstructionErrorCode = MBSpokenInstructionErrorCodeKey
 }
 
-extension NSAttributedString {
+public extension NSAttributedString {
     @available(iOS 10.0, *)
-    public func pronounced(_ pronunciation: String) -> NSAttributedString {
+    func pronounced(_ pronunciation: String) -> NSAttributedString {
         let phoneticWords = pronunciation.components(separatedBy: " ")
         let phoneticString = NSMutableAttributedString()
         for (word, phoneticWord) in zip(string.components(separatedBy: " "), phoneticWords) {
@@ -32,18 +32,20 @@ extension SpokenInstruction {
     func attributedText(for legProgress: RouteLegProgress) -> NSAttributedString {
         let attributedText = NSMutableAttributedString(string: text)
         if let step = legProgress.upComingStep,
-            let name = step.names?.first,
-            let phoneticName = step.phoneticNames?.first {
+           let name = step.names?.first,
+           let phoneticName = step.phoneticNames?.first
+        {
             let nameRange = attributedText.mutableString.range(of: name)
-            if (nameRange.location != NSNotFound) {
+            if nameRange.location != NSNotFound {
                 attributedText.replaceCharacters(in: nameRange, with: NSAttributedString(string: name).pronounced(phoneticName))
             }
         }
         if let step = legProgress.followOnStep,
-            let name = step.names?.first,
-            let phoneticName = step.phoneticNames?.first {
+           let name = step.names?.first,
+           let phoneticName = step.phoneticNames?.first
+        {
             let nameRange = attributedText.mutableString.range(of: name)
-            if (nameRange.location != NSNotFound) {
+            if nameRange.location != NSNotFound {
                 attributedText.replaceCharacters(in: nameRange, with: NSAttributedString(string: name).pronounced(phoneticName))
             }
         }
@@ -56,7 +58,6 @@ extension SpokenInstruction {
  */
 @objc(MBRouteVoiceController)
 open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
-    
     lazy var speechSynth = AVSpeechSynthesizer()
     
     let audioQueue = DispatchQueue(label: Bundle.mapboxNavigation.bundleIdentifier! + ".audio")
@@ -82,6 +83,8 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
     var volumeToken: NSKeyValueObservation?
     var muteToken: NSKeyValueObservation?
     
+    public var voiceLocale: Locale?
+    
     /**
      Default initializer for `RouteVoiceController`.
      */
@@ -101,7 +104,7 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
         }
 
         if !Bundle.main.backgroundModes.contains("audio") {
-            assert(false, "This application’s Info.plist file must include “audio” in UIBackgroundModes. This background mode is used for spoken instructions while the application is in the background.")
+            assertionFailure("This application’s Info.plist file must include “audio” in UIBackgroundModes. This background mode is used for spoken instructions while the application is in the background.")
         }
     }
 
@@ -115,7 +118,7 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(pauseSpeechAndPlayReroutingDing(notification:)), name: .routeControllerWillReroute, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didReroute(notification:)), name: .routeControllerDidReroute, object: nil)
         
-        muteToken = NavigationSettings.shared.observe(\.voiceMuted) { [weak self] (settings, change) in
+        muteToken = NavigationSettings.shared.observe(\.voiceMuted) { [weak self] settings, _ in
             if settings.voiceMuted {
                 self?.speechSynth.stopSpeaking(at: .immediate)
             }
@@ -203,29 +206,14 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
             voiceControllerDelegate?.voiceController?(self, spokenInstructionsDidFailWith: error)
         }
         
-        var utterance: AVSpeechUtterance?
-        if Locale.preferredLocalLanguageCountryCode == "en-US" {
-            // Alex can’t handle attributed text.
-            utterance = AVSpeechUtterance(string: instruction.text)
-            utterance!.voice = AVSpeechSynthesisVoice(identifier: AVSpeechSynthesisVoiceIdentifierAlex)
-        }
+        let regionCode = voiceLocale?.regionCode ?? Locale.preferredLocalLanguageCountryCode
+        let languageCode = voiceLocale?.languageCode ?? Locale.preferredLocalLanguageCountryCode
         
         let modifiedInstruction = voiceControllerDelegate?.voiceController?(self, willSpeak: instruction, routeProgress: routeProgress!) ?? instruction
         
-        if #available(iOS 10.0, *), utterance?.voice == nil {
-            utterance = AVSpeechUtterance(attributedString: modifiedInstruction.attributedText(for: routeProgress!.currentLegProgress))
-        } else {
-            utterance = AVSpeechUtterance(string: modifiedInstruction.text)
-        }
-        
-        // Only localized languages will have a proper fallback voice
-        if utterance?.voice == nil {
-            utterance?.voice = AVSpeechSynthesisVoice(language: Locale.preferredLocalLanguageCountryCode)
-        }
-        
-        if let utterance = utterance {
-            speechSynth.speak(utterance)
-        }
+        let utterance = AVSpeechUtterance(string: modifiedInstruction.text)
+        utterance.voice = AVSpeechSynthesisVoice(language: languageCode)
+        speechSynth.speak(utterance)
     }
 }
 
@@ -234,7 +222,6 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
  */
 @objc(MBVoiceControllerDelegate)
 public protocol VoiceControllerDelegate {
-    
     /**
      Called when the voice controller failed to speak an instruction.
      
