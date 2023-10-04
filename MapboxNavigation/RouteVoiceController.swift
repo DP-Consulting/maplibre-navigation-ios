@@ -59,8 +59,7 @@ extension SpokenInstruction {
 @objc(MBRouteVoiceController)
 open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
     lazy var speechSynth = AVSpeechSynthesizer()
-    var utterance: AVSpeechUtterance!
-    
+   
     let audioQueue = DispatchQueue(label: Bundle.mapboxNavigation.bundleIdentifier! + ".audio")
     
     /**
@@ -95,6 +94,7 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
         verifyBackgroundAudio()
 
         speechSynth.delegate = self
+        AVSpeechSynthesisVoice.speechVoices()
         
         resumeNotifications()
     }
@@ -212,8 +212,8 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
         
         let modifiedInstruction = voiceControllerDelegate?.voiceController?(self, willSpeak: instruction, routeProgress: routeProgress!) ?? instruction
         
-        utterance = AVSpeechUtterance(string: modifiedInstruction.text)
-        utterance.voice = AVSpeechSynthesisVoice(language: languageCode)
+        let utterance = AVSpeechUtterance(string: modifiedInstruction.text)
+        utterance.voice = AVSpeechSynthesisVoice(language: "fr-FR")
         speechSynth.speak(utterance)
     }
 }
