@@ -83,8 +83,6 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
     var volumeToken: NSKeyValueObservation?
     var muteToken: NSKeyValueObservation?
     
-    public var voiceLocale: Locale?
-    
     /**
      Default initializer for `RouteVoiceController`.
      */
@@ -206,9 +204,6 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
         } catch {
             voiceControllerDelegate?.voiceController?(self, spokenInstructionsDidFailWith: error)
         }
-        
-        let regionCode = voiceLocale?.regionCode ?? Locale.preferredLocalLanguageCountryCode
-        let languageCode = voiceLocale?.languageCode ?? Locale.preferredLocalLanguageCountryCode
         
         let modifiedInstruction = voiceControllerDelegate?.voiceController?(self, willSpeak: instruction, routeProgress: routeProgress!) ?? instruction
         
