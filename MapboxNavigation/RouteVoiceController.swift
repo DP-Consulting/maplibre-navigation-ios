@@ -180,22 +180,24 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
     @objc open func didPassSpokenInstructionPoint(notification: NSNotification) {
         guard !NavigationSettings.shared.voiceMuted else { return }
         
-        routeProgress = notification.userInfo![RouteControllerNotificationUserInfoKey.routeProgressKey] as? RouteProgress
+        routeProgress = notification.userInfo?[RouteControllerNotificationUserInfoKey.routeProgressKey] as? RouteProgress
         assert(routeProgress != nil, "routeProgress should not be nil.")
 
-        guard let instruction = routeProgress!.currentLegProgress.currentStepProgress.currentSpokenInstruction else { return }
+        guard let instruction = routeProgress?.currentLegProgress.currentStepProgress.currentSpokenInstruction else { return }
+        let speechLocale = routeProgress?.route.routeOptions.locale
+        
         lastSpokenInstruction = instruction
-        speak(instruction)
+        speak(instruction, with: speechLocale)
     }
-    
+
     /**
      Reads aloud the given instruction.
      
      - parameter instruction: The instruction to read aloud.
+     - parameter locale: The `Locale` used to create the voice read aloud the given instruction. If `nil` the `Locale.preferredLocalLanguageCountryCode` is used for creating the voice.
+     - parameter ignoreProgress: A `Bool` that indicates if the routeProgress is added to the instruction.
      */
-    open func speak(_ instruction: SpokenInstruction) {
-        assert(routeProgress != nil, "routeProgress should not be nil.")
-        
+    open func speak(_ instruction: SpokenInstruction, with locale: Locale?, ignoreProgress: Bool = false) {
         if speechSynth.isSpeaking, let lastSpokenInstruction = lastSpokenInstruction {
             voiceControllerDelegate?.voiceController?(self, didInterrupt: lastSpokenInstruction, with: instruction)
         }
@@ -206,13 +208,26 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
             voiceControllerDelegate?.voiceController?(self, spokenInstructionsDidFailWith: error)
         }
         
-        let regionCode = voiceLocale?.regionCode ?? Locale.preferredLocalLanguageCountryCode
         let languageCode = voiceLocale?.languageCode ?? Locale.preferredLocalLanguageCountryCode
+        let modifiedInstruction = voiceControllerDelegate?.voiceController?(self, willSpeak: instruction, routeProgress: routeProgress) ?? instruction
+
+        let utterance: AVSpeechUtterance
+
+        if locale?.identifier == "en-US" {
+            // Alex can’t handle attributed text.
+            utterance = AVSpeechUtterance(string: modifiedInstruction.text)
+            utterance.voice = AVSpeechSynthesisVoice(identifier: AVSpeechSynthesisVoiceIdentifierAlex)
+        } else {
+            if #available(iOS 10.0, *), !ignoreProgress, let routeProgress {
+                utterance = AVSpeechUtterance(attributedString: modifiedInstruction.attributedText(for: routeProgress.currentLegProgress))
+            } else {
+                utterance = AVSpeechUtterance(string: modifiedInstruction.text)
+            }
+            
+            // Only localized languages will have a proper fallback voice
+            utterance.voice = AVSpeechSynthesisVoice(language: languageCode)
+        }
         
-        let modifiedInstruction = voiceControllerDelegate?.voiceController?(self, willSpeak: instruction, routeProgress: routeProgress!) ?? instruction
-        
-        let utterance = AVSpeechUtterance(string: modifiedInstruction.text)
-        utterance.voice = AVSpeechSynthesisVoice(language: languageCode)
         speechSynth.speak(utterance)
     }
 }
@@ -245,8 +260,8 @@ public protocol VoiceControllerDelegate {
      
      - parameter voiceController: The voice controller that will speak an instruction.
      - parameter instruction: The spoken instruction that will be said.
-     - parameter routeProgress: The `RouteProgress` just before when the instruction is scheduled to be spoken.
+     - parameter routeProgress: The `RouteProgress` just before when the instruction is scheduled to be spoken. Could be `nil` if no progress is available or if it should be ignored.
      **/
     @objc(voiceController:willSpeakSpokenInstruction:routeProgress:)
-    optional func voiceController(_ voiceController: RouteVoiceController, willSpeak instruction: SpokenInstruction, routeProgress: RouteProgress) -> SpokenInstruction?
+    optional func voiceController(_ voiceController: RouteVoiceController, willSpeak instruction: SpokenInstruction, routeProgress: RouteProgress?) -> SpokenInstruction?
 }
