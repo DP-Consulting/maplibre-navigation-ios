@@ -625,10 +625,10 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
                
                 if #available(iOS 15, *) {
                     arrow.lineWidth = NSExpression(
-                        forMGLInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
+                        forMLNInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
                         curveType: .linear,
                         parameters: nil,
-                        stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel.multiplied(by: 0.70)))
+                        stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel.multiplied(by: 0.7)))
                 } else {
                     arrow.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel.multiplied(by: 0.70))
                 }
@@ -649,10 +649,10 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
 
                 if #available(iOS 15, *) {
                     arrowStroke.lineWidth = NSExpression(
-                        forMGLInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
+                        forMLNInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
                         curveType: .linear,
                         parameters: nil,
-                        stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel.multiplied(by: 0.80)))
+                        stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel.multiplied(by: 0.8)))
                 } else {
                     arrowStroke.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel.multiplied(by: 0.80))
                 }
@@ -687,7 +687,7 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
 
                 if #available(iOS 15, *) {
                     arrowSymbolLayer.iconScale = NSExpression(
-                        forMGLInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
+                        forMLNInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
                         curveType: .linear,
                         parameters: nil,
                         stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel.multiplied(by: 0.12)))
@@ -708,7 +708,7 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
 
                 if #available(iOS 15, *) {
                     arrowSymbolLayerCasing.iconScale = NSExpression(
-                        forMGLInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
+                        forMLNInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
                         curveType: .linear,
                         parameters: nil,
                         stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel.multiplied(by: 0.14)))
@@ -964,16 +964,16 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
         return symbol
     }
     
-    func routeStyleLayer(identifier: String, source: MGLSource) -> MGLStyleLayer {
-        let line = MGLLineStyleLayer(identifier: identifier, source: source)
+    func routeStyleLayer(identifier: String, source: MLNSource) -> MLNStyleLayer {
+        let line = MLNLineStyleLayer(identifier: identifier, source: source)
         // line.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
 
         if #available(iOS 15, *) {
             line.lineWidth = NSExpression(
-                forMGLInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
+                forMLNInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
                 curveType: .linear,
                 parameters: nil,
-                stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel))
+                stops: NSExpression(forConstantValue: MLNRouteLineWidthByZoomLevel))
             
         } else {
             line.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
@@ -995,14 +995,14 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
         return line
     }
     
-    func routeCasingStyleLayer(identifier: String, source: MGLSource) -> MGLStyleLayer {
-        let lineCasing = MGLLineStyleLayer(identifier: identifier, source: source)
+    func routeCasingStyleLayer(identifier: String, source: MLNSource) -> MLNStyleLayer {
+        let lineCasing = MLNLineStyleLayer(identifier: identifier, source: source)
         // lineCasing.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel.multiplied(by: 1.5))
 
         // Take the default line width and make it wider for the casing
         if #available(iOS 15, *) {
             lineCasing.lineWidth = NSExpression(
-                forMGLInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
+                forMLNInterpolating: NSExpression(forConstantValue: minimumZoomLevel),
                 curveType: .linear,
                 parameters: nil,
                 stops: NSExpression(forConstantValue: MBRouteLineWidthByZoomLevel.multiplied(by: 1.5)))

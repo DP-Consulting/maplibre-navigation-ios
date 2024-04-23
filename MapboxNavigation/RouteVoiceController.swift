@@ -207,7 +207,7 @@ open class RouteVoiceController: NSObject, AVSpeechSynthesizerDelegate {
             voiceControllerDelegate?.voiceController?(self, spokenInstructionsDidFailWith: error)
         }
         
-        let languageCode = voiceLocale?.languageCode ?? Locale.preferredLocalLanguageCountryCode
+        let languageCode = locale?.languageCode ?? Locale.preferredLocalLanguageCountryCode
         let modifiedInstruction = voiceControllerDelegate?.voiceController?(self, willSpeak: instruction, routeProgress: routeProgress) ?? instruction
 
         let utterance: AVSpeechUtterance
