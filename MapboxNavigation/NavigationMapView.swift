@@ -1,8 +1,7 @@
 import Foundation
-import Mapbox
-import MapLibre
 import MapboxCoreNavigation
 import MapboxDirections
+import MapLibre
 import Turf
 
 /**
@@ -10,7 +9,6 @@ import Turf
  */
 @objc(MLNavigationMapView)
 open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
-    
     // MARK: Class Constants
     
     enum FrameIntervalOptions {
@@ -292,9 +290,9 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
         if let location = userLocationForCourseTracking {
             let cameraUpdated = courseTrackingDelegate?.updateCamera?(self, location: location, routeProgress: routeProgress) ?? false
             
-            if(!cameraUpdated){
+            if !cameraUpdated {
                 let newCamera = MLNMapCamera(lookingAtCenter: location.coordinate, acrossDistance: altitude, pitch: 45, heading: location.course)
-                let function: CAMediaTimingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+                let function = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
                 setCamera(newCamera, withDuration: 1, animationTimingFunction: function, edgePadding: UIEdgeInsets.zero, completionHandler: nil)
             }
         }
@@ -339,9 +337,7 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
         tracksUserCourse = false
     }
     
-
     @objc public func updateCourseTracking(location: CLLocation?, camera: MLNMapCamera? = nil, animated: Bool = false) {
-        
         // While animating to overhead mode, don't animate the puck.
         let duration: TimeInterval = animated && !isAnimatingToOverheadMode ? 1 : 0
         animatesUserLocation = animated
@@ -461,7 +457,8 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
         let mainPolylineSimplified = navigationMapDelegate?.navigationMapView?(self, simplifiedShapeFor: mainRoute) ?? shape(forCasingOf: mainRoute, legIndex: legIndex)
         
         if let source = style.source(withIdentifier: sourceIdentifier) as? MLNShapeSource,
-            let sourceSimplified = style.source(withIdentifier: sourceCasingIdentifier) as? MLNShapeSource {
+           let sourceSimplified = style.source(withIdentifier: sourceCasingIdentifier) as? MLNShapeSource
+        {
             source.shape = polylines
             sourceSimplified.shape = mainPolylineSimplified
         } else {
@@ -475,7 +472,8 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
             
             for layer in style.layers.reversed() {
                 if !(layer is MLNSymbolStyleLayer) &&
-                    layer.identifier != arrowLayerIdentifier && layer.identifier != arrowSymbolLayerIdentifier && layer.identifier != arrowCasingSymbolLayerIdentifier && layer.identifier != arrowLayerStrokeIdentifier && layer.identifier != waypointCircleIdentifier {
+                    layer.identifier != arrowLayerIdentifier && layer.identifier != arrowSymbolLayerIdentifier && layer.identifier != arrowCasingSymbolLayerIdentifier && layer.identifier != arrowLayerStrokeIdentifier && layer.identifier != waypointCircleIdentifier
+                {
                     style.insertLayer(line, below: layer)
                     style.insertLayer(lineCasing, below: line)
                     break
@@ -520,9 +518,8 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
         let waypoints: [Waypoint] = Array(route.legs.map { $0.destination }.dropLast())
         
         let source = navigationMapDelegate?.navigationMapView?(self, shapeFor: waypoints, legIndex: legIndex) ?? shape(for: waypoints, legIndex: legIndex)
-        if route.routeOptions.waypoints.count > 2 { //are we on a multipoint route?
-            
-            routes = [route] //update the model
+        if route.routeOptions.waypoints.count > 2 { // are we on a multipoint route?
+            routes = [route] // update the model
             if let waypointSource = style.source(withIdentifier: waypointSourceIdentifier) as? MLNShapeSource {
                 waypointSource.shape = source
             } else {
